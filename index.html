@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172c36"><meta name="description" content="A local, visual deli closing-shift workspace. See the time, the milestones, and the work remaining.">
+<title>Ghost Lead · Closing shift</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23172c36'/%3E%3Cpath d='M11 29V17a9 9 0 0 1 18 0v12l-5-3-4 3-4-3Z' fill='%2368e2bd'/%3E%3Ccircle cx='17' cy='17' r='2' fill='%23172c36'/%3E%3Ccircle cx='24' cy='17' r='2' fill='%23172c36'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="dist/styles.css"><script src="dist/core.js" defer></script><script src="dist/app.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">g.</span><span>Ghost Lead <small>v0.1</small></span></div><span class="local-label">Local workspace</span></header>
+<main>
+<div class="page-heading"><div><p class="eyebrow">DELI / CLOSING SHIFT</p><h1>A clear view of the evening.</h1><p class="subtitle">1:30–10:00 PM <span>·</span> Customer service closes at 9:00 PM</p></div><button id="reset" class="quiet">Reset shift</button></div>
+<section class="overview" aria-label="Shift overview">
+<div class="now-panel"><div class="panel-top"><span id="clock-label" class="eyebrow">DEMO CLOCK</span><span id="shift-status" class="status-pill"></span></div><div id="clock" class="big-clock"></div><div class="countdowns"><span><strong id="time-left"></strong> left in shift</span><span id="close-left"></span></div></div>
+<div class="next-panel"><p class="eyebrow">NEXT SCHEDULED MILESTONE</p><h2 id="next-title"></h2><p id="next-note"></p><div class="milestone-time"><strong id="next-time"></strong><span id="next-countdown"></span></div></div>
+</section>
+<section class="timeline-panel" aria-labelledby="timeline-title"><div class="section-heading"><div><p class="eyebrow">THE WHOLE EVENING</p><h2 id="timeline-title">Your shift, at a glance</h2></div><div class="legend"><span><i class="legend-fill"></i>Done</span><span><i class="legend-open"></i>Open work</span><span><i class="legend-now"></i>Now</span></div></div>
+<div class="timeline-scroll"><div class="timeline-inner"><div class="axis" aria-hidden="true"><span style="left:0">1:30 PM</span><span style="left:29.412%">4:00</span><span style="left:64.706%">7:00</span><span style="left:88.235%">9:00</span><span style="left:100%">10:00</span></div><div id="timeline" class="timeline"><div id="now-marker" class="now-marker"><span>NOW</span></div><div class="close-marker" style="left:88.235%"></div><div id="lanes"></div></div><div class="axis-labels"><span>SHIFT START</span><span>CUSTOMER CLOSE → SHIFT END</span></div></div></div>
+<div class="clock-controls"><div><strong>Explore the shift</strong><span id="clock-help">Demo time · task states stay as you set them</span></div><label class="sr-only" for="demo-time">Demo time</label><input id="demo-time" type="range" min="810" max="1320" step="5" value="1065"><output id="demo-output" for="demo-time"></output><button id="live-toggle" class="quiet" aria-pressed="false">Use live clock</button></div>
+</section>
+<section class="work-shape" aria-label="Remaining work and time"><div class="shape-intro"><p class="eyebrow">WHAT’S LEFT</p><h2>Work & time</h2><p>Two views of the same shift.</p></div><div class="measure"><div><strong id="work-count"></strong><span>tasks still open</span></div><div id="task-segments" class="task-segments" aria-hidden="true"></div><small id="work-note"></small></div><div class="measure"><div><strong id="remaining-label"></strong><span>of the 8h 30m shift remains</span></div><div class="time-track"><div id="remaining-bar"></div></div><small>Task counts show completion, not effort or staffing capacity.</small></div></section>
+<section aria-labelledby="tasks-title"><div class="section-heading tasks-heading"><div><p class="eyebrow">THE SHIFT PLAN</p><h2 id="tasks-title">One task at a time</h2></div><p id="task-summary" aria-live="polite"></p></div><div id="tasks"></div></section>
+<footer><span id="save-status" role="status">Changes saved on this browser.</span><span>Illustrative sample schedule · follow your team’s procedures.</span></footer>
+</main>
+<dialog id="reset-dialog"><form method="dialog"><p class="eyebrow">START FRESH</p><h2>Reset this shift?</h2><p>All task states will return to Not Started. The demo clock will return to 1:30 PM.</p><div class="dialog-actions"><button value="cancel" class="quiet">Keep working</button><button value="reset" class="primary">Reset shift</button></div></form></dialog>
+</body></html>

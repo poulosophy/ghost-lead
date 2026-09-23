@@ -1,0 +1,1 @@
+{"name":"ghost-lead","version":"0.1.0","private":true,"description":"Local deli closing-shift prototype","scripts":{"start":"node server.cjs","test":"node --test tests/core.test.cjs"}}
