@@ -28,9 +28,9 @@ for(const [name,width,height] of [['mac',1440,1100],['ipad',820,1180],['phone',3
 }
 await page.selectOption('#state-scan','Dependency');
 assert.equal(await page.locator('#dependency-scan').isVisible(),true);
-const reasons=await page.locator('#dependency-scan option').allTextContents();assert.equal(reasons.length,9);
+const reasons=await page.locator('#dependency-scan option').allTextContents();assert.equal(reasons.length,10);
 for(const reason of reasons.slice(1)){await page.selectOption('#dependency-scan',{label:reason});assert.equal(await page.locator('#dependency-detail-scan').innerText(),reason);}
-await page.reload();assert.equal(await page.inputValue('#state-scan'),'Dependency');assert.equal(await page.inputValue('#dependency-scan'),reasons[8]);
+await page.reload();assert.equal(await page.inputValue('#state-scan'),'Dependency');assert.equal(await page.inputValue('#dependency-scan'),reasons[9]);
 for(const view of ['grouped','vertical']){await page.click('[data-view='+view+']');for(const width of [320,390,820,1440]){await page.setViewportSize({width,height:1000});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);}}
 await page.selectOption('#state-scan','Done');assert.equal(await page.locator('#dependency-scan').isVisible(),false);
 await page.selectOption('#state-scan','Dependency');assert.equal(await page.inputValue('#dependency-scan'),'');

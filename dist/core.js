@@ -1,7 +1,7 @@
 (function (root) {
   const START = 810, CLOSE = 1260, END = 1320;
   const statuses = ['Not Started', 'Started', 'Done', 'Needs More Time', 'Blocked', 'Dependency', 'NA Does not apply'];
-  const dependencyOptions = ["Dishes need to be washed", "Oven is in use", "Someone else is completing task", "Out of something that's needed", "Don't know how to complete task", "Can't complete task due to physical limitations", "Requires manager info or permissions", "Other dependency, contingency, or issue"];
+  const dependencyOptions = ["Dishes need to be washed", "Oven is in use", "Friers in use/ nonfunctional", "Someone else is completing task", "Out of something that's needed", "Don't know how to complete task", "Can't complete task due to physical limitations", "Requires manager info or permissions", "Other dependency, contingency, or issue"];
   const cleanDependencies = raw => Object.fromEntries(tasks.map(t=>[t.id, dependencyOptions.includes(raw?.[t.id]) ? raw[t.id] : ""]));
   const tasks = [
     {id:'scan', title:'Take a shift scan', time:810, end:830, phase:0, detail:'See what is ready, what needs attention, and what is already underway.'},
