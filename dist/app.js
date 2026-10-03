@@ -1,12 +1,12 @@
 (() => {
   const G=GhostLead, $=id=>document.getElementById(id), KEY='ghost-lead-v01-shift';
-  let state=G.cleanState(), demo=1065, live=false, storageOK=true;
-  try {const saved=JSON.parse(localStorage.getItem(KEY)); if(saved?.version===1){state=G.cleanState(saved.tasks);demo=Number.isFinite(saved.demo)?Math.round(Math.min(G.END,Math.max(G.START,saved.demo))):1065;live=saved.live===true;}}catch{storageOK=false;}
+  let state=G.cleanState(), dependencies=G.cleanDependencies(), demo=1065, live=false, storageOK=true;
+  try {const saved=JSON.parse(localStorage.getItem(KEY)); if(saved?.version===1){state=G.cleanState(saved.tasks);dependencies=G.cleanDependencies(saved.dependencies);demo=Number.isFinite(saved.demo)?Math.round(Math.min(G.END,Math.max(G.START,saved.demo))):1065;live=saved.live===true;}}catch{storageOK=false;}
   const slug=s=>s.toLowerCase().replaceAll(' ','-');
   function now(){const d=new Date();return live?d.getHours()*60+d.getMinutes():demo;}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify({version:1,tasks:state,demo,live}));storageOK=true;}catch{storageOK=false;} $('save-status').textContent=storageOK?'Changes saved on this browser.':'Browser storage unavailable. Changes last until this page closes.';}
-  function setStatus(id,status){if(!G.tasks.some(t=>t.id===id)||!G.statuses.includes(status))throw new Error('Unknown task or status');state[id]=status;save();render();return {id,status};}
-  $('tasks').innerHTML=G.phases.map((p,i)=>`<section class="task-group" aria-labelledby="phase-${i}"><div class="group-label"><span class="group-index">0${i+1}</span><h3 id="phase-${i}">${p.name}</h3><p>${G.formatTime(p.start)}–${G.formatTime(p.end)}</p><div id="group-count-${i}" class="group-count"></div></div><div class="task-list">${G.tasks.filter(t=>t.phase===i).map(t=>`<article id="card-${t.id}" class="task-card"><span class="vertical-time">${G.formatTime(t.time)}</span><div class="task-meta"><span>${G.formatTime(t.time)}${t.id==='dinner'?'–4:30 PM':t.time===1260&&!t.milestone?'–10:00 PM':''}</span>${t.milestone?'<span class="milestone-tag">MILESTONE</span>':''}</div><h3>${t.title}</h3><p>${t.detail}</p><div class="task-bottom"><label for="state-${t.id}" class="sr-only">Status for ${t.title}</label><select id="state-${t.id}" data-task="${t.id}">${G.statuses.map(s=>`<option>${s}</option>`).join('')}</select><span class="task-timing" id="timing-${t.id}"></span></div></article>`).join('')}</div></section>`).join('');
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({version:1,tasks:state,dependencies,demo,live}));storageOK=true;}catch{storageOK=false;} $('save-status').textContent=storageOK?'Changes saved on this browser.':'Browser storage unavailable. Changes last until this page closes.';}
+  function setStatus(id,status){if(!G.tasks.some(t=>t.id===id)||!G.statuses.includes(status))throw new Error('Unknown task or status');state[id]=status;if(status!=='Dependency')dependencies[id]="";save();render();return {id,status};}
+  $('tasks').innerHTML=G.phases.map((p,i)=>`<section class="task-group" aria-labelledby="phase-${i}"><div class="group-label"><span class="group-index">0${i+1}</span><h3 id="phase-${i}">${p.name}</h3><p>${G.formatTime(p.start)}–${G.formatTime(p.end)}</p><div id="group-count-${i}" class="group-count"></div></div><div class="task-list">${G.tasks.filter(t=>t.phase===i).map(t=>`<article id="card-${t.id}" class="task-card"><span class="vertical-time">${G.formatTime(t.time)}</span><div class="task-meta"><span>${G.formatTime(t.time)}${t.id==='dinner'?'–4:30 PM':t.time===1260&&!t.milestone?'–10:00 PM':''}</span>${t.milestone?'<span class="milestone-tag">MILESTONE</span>':''}</div><h3>${t.title}</h3><p>${t.detail}</p><div class="task-bottom"><label for="state-${t.id}" class="sr-only">Status for ${t.title}</label><select id="state-${t.id}" data-task="${t.id}">${G.statuses.map(s=>`<option>${s}</option>`).join('')}</select><span class="task-timing" id="timing-${t.id}"></span></div><div id="dependency-wrap-${t.id}" class="dependency-field" hidden><label for="dependency-${t.id}">Dependency for ${t.title}</label><select id="dependency-${t.id}" data-dependency="${t.id}" aria-describedby="dependency-detail-${t.id}"><option value="">Choose a dependency…</option>${G.dependencyOptions.map(reason=>`<option>${reason}</option>`).join('')}</select><p id="dependency-detail-${t.id}" class="dependency-detail"></p></div></article>`).join('')}</div></section>`).join('');
   $('lanes').innerHTML=G.phases.map((p,i)=>`<div class="lane"><div class="phase-bar ${i===3?'final-bar':''}" style="left:${G.position(p.start)}%;width:${G.position(p.end)-G.position(p.start)}%"><div id="phase-fill-${i}" class="phase-fill"></div><span>${p.short}</span></div></div>`).join('');
   function render(){
     const time=now(), s=G.summarize(time,state), formatted=G.formatTime(time);
@@ -30,12 +30,12 @@
     $('clock-help').textContent=live?'Live time from this device':'Demo time · task states stay as you set them';
     $('work-count').textContent=`${s.open.length} / ${G.tasks.length}`;
     $('task-segments').innerHTML=G.tasks.map(t=>`<i class="${slug(state[t.id])}"></i>`).join('');
-    $('work-note').textContent=`${s.done} done · ${s.blocked} blocked · ${s.extra} need more time`;
+    $('work-note').textContent=`${s.done} done · ${s.blocked} blocked · ${s.extra} need more time · ${s.dependencies} dependencies`;
     $('remaining-label').textContent=G.duration(s.remaining);
     $('remaining-bar').style.width=`${s.remaining/(G.END-G.START)*100}%`;
     $('task-summary').textContent=`${s.done} of ${G.tasks.length} done · ${s.open.length} open`;
     G.phases.forEach((p,i)=>{const list=G.tasks.filter(t=>t.phase===i), done=list.filter(t=>state[t.id]==='Done').length;$(`phase-fill-${i}`).style.width=`${done/list.length*100}%`;$(`group-count-${i}`).textContent=`${done} of ${list.length} done`;});
-    G.tasks.forEach(t=>{const status=state[t.id];$(`card-${t.id}`).className=`task-card ${slug(status)}`;$(`state-${t.id}`).value=status;$(`timing-${t.id}`).textContent=status==='Done'?'✓ Complete':status==='Blocked'?'Needs a hand':status==='Needs More Time'?'More time needed':time<t.time?`In ${G.duration(t.time-time)}`:time>t.end?'Still open':t.milestone?'Scheduled now':'In this window';});
+    G.tasks.forEach(t=>{const status=state[t.id];$(`dependency-wrap-${t.id}`).hidden=status!=='Dependency';$(`dependency-${t.id}`).value=dependencies[t.id];$(`dependency-detail-${t.id}`).textContent=dependencies[t.id];$(`card-${t.id}`).className=`task-card ${slug(status)}`;$(`state-${t.id}`).value=status;$(`timing-${t.id}`).textContent=status==='Dependency'?'Waiting on dependency':status==='Done'?'✓ Complete':status==='Blocked'?'Needs a hand':status==='Needs More Time'?'More time needed':time<t.time?`In ${G.duration(t.time-time)}`:time>t.end?'Still open':t.milestone?'Scheduled now':'In this window';});
   }
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
     const vertical=button.dataset.view==='vertical';
@@ -43,12 +43,12 @@
     document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
     $('vertical-note').hidden=!vertical;
   }));
-  $('tasks').addEventListener('change',e=>{if(e.target.dataset.task)setStatus(e.target.dataset.task,e.target.value);});
+  $('tasks').addEventListener('change',e=>{if(e.target.dataset.task)setStatus(e.target.dataset.task,e.target.value);if(e.target.dataset.dependency){const id=e.target.dataset.dependency;if(state[id]==='Dependency'&&G.dependencyOptions.includes(e.target.value)){dependencies[id]=e.target.value;save();render();}else if(e.target.value===''){dependencies[id]='';save();render();}}});
   $('demo-time').addEventListener('input',e=>{demo=Number(e.target.value);save();render();});
   $('live-toggle').addEventListener('click',()=>{live=!live;save();render();});
   $('reset').addEventListener('click',()=>{$('reset-dialog').showModal();});
-  $('reset-dialog').addEventListener('close',()=>{if($('reset-dialog').returnValue==='reset'){state=G.cleanState();demo=G.START;live=false;save();render();}});
-  window.addEventListener('storage',e=>{if(e.key===KEY){try{const v=JSON.parse(e.newValue);state=G.cleanState(v?.tasks);render();}catch{}}});
+  $('reset-dialog').addEventListener('close',()=>{if($('reset-dialog').returnValue==='reset'){state=G.cleanState();dependencies=G.cleanDependencies();demo=G.START;live=false;save();render();}});
+  window.addEventListener('storage',e=>{if(e.key===KEY){try{const v=JSON.parse(e.newValue);state=G.cleanState(v?.tasks);dependencies=G.cleanDependencies(v?.dependencies);render();}catch{}}});
   setInterval(()=>{if(live)render();},15000);
   render();
   if(!storageOK)$('save-status').textContent='Browser storage unavailable. Changes last until this page closes.';

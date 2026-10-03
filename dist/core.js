@@ -1,6 +1,8 @@
 (function (root) {
   const START = 810, CLOSE = 1260, END = 1320;
-  const statuses = ['Not Started', 'Started', 'Done', 'Needs More Time', 'Blocked'];
+  const statuses = ['Not Started', 'Started', 'Done', 'Needs More Time', 'Blocked', 'Dependency'];
+  const dependencyOptions = ["Dishes need to be washed", "Oven is in use", "Someone else is completing task", "Out of something that's needed", "Don't know how to complete task", "Can't complete task due to physical limitations", "Requires manager info or permissions", "Other dependency, contingency, or issue"];
+  const cleanDependencies = raw => Object.fromEntries(tasks.map(t=>[t.id, dependencyOptions.includes(raw?.[t.id]) ? raw[t.id] : ""]));
   const tasks = [
     {id:'scan', title:'Take a shift scan', time:810, end:830, phase:0, detail:'See what is ready, what needs attention, and what is already underway.'},
     {id:'rotisserie', title:'Check & start rotisserie', time:810, end:855, phase:0, detail:'Check whole-chicken status. Prepare and start the next cook if needed.'},
@@ -43,10 +45,11 @@
     const open = tasks.filter(t => state[t.id] !== 'Done');
     return {open, done:tasks.length-open.length, remaining:Math.max(0, END-Math.max(START,time)),
       next:milestones.find(m=>m.time>=time), blocked:open.filter(t=>state[t.id]==='Blocked').length,
+      dependencies:open.filter(t=>state[t.id]==='Dependency').length,
       extra:open.filter(t=>state[t.id]==='Needs More Time').length,
       status:time<START?'Before shift':time>=END?(open.length?'Shift ended · work still open':'Shift complete'):time>=CLOSE?'Final closing hour':'Service open'};
   }
-  const api = {START,CLOSE,END,statuses,tasks,phases,milestones,position,formatTime,duration,cleanState,summarize};
+  const api = {START,CLOSE,END,statuses,dependencyOptions,cleanDependencies,tasks,phases,milestones,position,formatTime,duration,cleanState,summarize};
   if (typeof module !== 'undefined') module.exports=api;
   root.GhostLead=api;
 })(globalThis);
