@@ -19,9 +19,9 @@ Open http://127.0.0.1:4173. Stop with Control+C. No npm install is needed.
 
 ## How to try the shift
 
-- The first visit starts at **5:45 PM in demo mode**, with all 14 tasks Not Started.
+- The first visit starts at **5:45 PM in demo mode**, with all 19 tasks Not Started.
 - Drag the demo clock to explore 1:30–10:00 PM. Moving time does not complete tasks.
-- Use each task’s menu to select Not Started, Started, Done, Needs More Time, or Blocked.
+- Use each task’s menu to select Not Started, Started, Done, Needs More Time, Blocked, Dependency, or NA Does not apply. Dependency reveals a saved reason menu; NA excludes the task from remaining work without marking it Done.
 - Use live clock to follow the device’s local time. Return to demo mode whenever you like.
 - The timeline’s shaded portions represent completed task counts within each phase; the vertical line represents time.
 - Work and time are separate measures. Task counts are not estimates of labor, duration, staffing, or whether the team can finish.
@@ -47,7 +47,7 @@ This is a browser-first starting point for a future PWA or Raspberry Pi kiosk. I
 
 ## Validation
 
-Six core tests pass. A separate headless Chrome browser check covered all five states, reload persistence, demo/live clocks, reset and cancel, Mac/iPad/phone viewport widths, 44px task controls, direct-file mode, unavailable storage, and the optional agent-tool callback with valid/invalid inputs. Browser checks are simulations, not tests on a physical iPad.
+Nine core tests pass. A separate headless Chrome browser check covered task states, reload persistence, demo/live clocks, reset and cancel, Mac/iPad/phone viewport widths, 44px task controls, direct-file mode, unavailable storage, and the optional agent-tool callback with valid/invalid inputs. Browser checks are simulations, not tests on a physical iPad.
 
 The optional browser test is in `tests/browser.cjs`; it requires Playwright and Chrome and a running local server. Run `node tests/browser.cjs` in an environment with Playwright installed, or set `PLAYWRIGHT_MODULE` to its module path. No browser-test package is needed to use the app. Agent-tool registration was tested through a simulated browser API; native WebMCP support was not available.
 

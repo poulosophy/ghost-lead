@@ -1,6 +1,6 @@
 (function (root) {
   const START = 810, CLOSE = 1260, END = 1320;
-  const statuses = ['Not Started', 'Started', 'Done', 'Needs More Time', 'Blocked', 'Dependency'];
+  const statuses = ['Not Started', 'Started', 'Done', 'Needs More Time', 'Blocked', 'Dependency', 'NA Does not apply'];
   const dependencyOptions = ["Dishes need to be washed", "Oven is in use", "Someone else is completing task", "Out of something that's needed", "Don't know how to complete task", "Can't complete task due to physical limitations", "Requires manager info or permissions", "Other dependency, contingency, or issue"];
   const cleanDependencies = raw => Object.fromEntries(tasks.map(t=>[t.id, dependencyOptions.includes(raw?.[t.id]) ? raw[t.id] : ""]));
   const tasks = [
@@ -8,7 +8,12 @@
     {id:'rotisserie', title:'Check & start rotisserie', time:810, end:855, phase:0, detail:'Check whole-chicken status. Prepare and start the next cook if needed.'},
     {id:'hot-assess', title:'Assess the hot case', time:830, end:860, phase:0, detail:'Check the hot case and customer essentials; identify what needs replenishing.'},
     {id:'breaded', title:'Plan breaded-chicken production', time:850, end:900, phase:0, detail:'Check inventory and decide what tonight’s production needs to cover.'},
-    {id:'dinner', title:'Dinner readiness', time:960, end:990, phase:1, milestone:true, detail:'Check that the hot case and dinner essentials are ready for the 4:00–4:30 rush.'},
+    {"id": "dinner-chicken", "title": "Fry once-breaded dark & mixed chicken", "time": 960, "end": 990, "phase": 1, "detail": "Fry enough once-breaded dark and mixed chicken for dinner \u2014 roughly two boxes likely."},
+    {"id": "dinner-sides", "title": "Fill tenders, Jojos & main sides", "time": 960, "end": 990, "phase": 1, "detail": "Fill tenders, Jojos, mac, mash and gravy for dinner."},
+    {"id": "dinner-cold", "title": "Fill popular cold-case items", "time": 960, "end": 990, "phase": 1, "detail": "Fill the most popular cold-case items, including salads, pastas and the Asian area."},
+    {"id": "dinner-dishes", "title": "Wash daytime dishes", "time": 960, "end": 990, "phase": 1, "detail": "Wash the dishes left from daytime service."},
+    {"id": "dinner-bag", "title": "Bag & time rotisserie chickens", "time": 960, "end": 990, "phase": 1, "detail": "Bag the rotisserie chickens and write the times on the bags."},
+    {"id": "dinner-shred", "title": "Remove & shred older rotisserie chickens", "time": 960, "end": 990, "phase": 1, "detail": "Remove and shred the older rotisserie chickens."},
     {id:'cheese', title:'Begin cheese slicer shutdown', time:1130, end:1140, phase:2, detail:'Start the slicer shutdown sequence with the cheese slicer.'},
     {id:'slicers', title:'Slicers closed', time:1140, end:1140, phase:2, milestone:true, detail:'Confirm the slicer shutdown milestone is complete.'},
     {id:'hot-close', title:'Empty & shut down the hot case', time:1230, end:1245, phase:2, detail:'Remove hot-case food and switch off the case.'},
@@ -42,8 +47,8 @@
     return Object.fromEntries(tasks.map(t => [t.id, statuses.includes(raw?.[t.id]) ? raw[t.id] : 'Not Started']));
   }
   function summarize(time, state) {
-    const open = tasks.filter(t => state[t.id] !== 'Done');
-    return {open, done:tasks.length-open.length, remaining:Math.max(0, END-Math.max(START,time)),
+    const open = tasks.filter(t => state[t.id] !== 'Done' && state[t.id] !== 'NA Does not apply');
+    return {open, done:tasks.filter(t=>state[t.id]==='Done').length, na:tasks.filter(t=>state[t.id]==='NA Does not apply').length, remaining:Math.max(0, END-Math.max(START,time)),
       next:milestones.find(m=>m.time>=time), blocked:open.filter(t=>state[t.id]==='Blocked').length,
       dependencies:open.filter(t=>state[t.id]==='Dependency').length,
       extra:open.filter(t=>state[t.id]==='Needs More Time').length,
