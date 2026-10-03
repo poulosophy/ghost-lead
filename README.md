@@ -56,3 +56,7 @@ The optional browser test is in `tests/browser.cjs`; it requires Playwright and 
 Publish the `main` branch from `/(root)`. The root `index.html` loads the existing assets in `dist/`; the original direct-file and local-server structure is preserved. Keep both HTML entry files aligned when changing page content. `.nojekyll` disables unnecessary processing.
 
 The website is public. Do not commit credentials, employee details, or confidential workplace information. Task updates remain in the current browser and do not sync between devices.
+
+## Views
+
+Use the menu below the clock overview to switch between Milestones, Grouped tasks, Dependencies, and Vertical timeline. Dependencies lists tasks with Dependency status and their selected reason. Check “No longer applies” on the right to clear the reason and return that task to Not Started. This does not mark the task Done.

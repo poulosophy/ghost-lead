@@ -8,7 +8,24 @@
   function setStatus(id,status){if(!G.tasks.some(t=>t.id===id)||!G.statuses.includes(status))throw new Error('Unknown task or status');state[id]=status;if(status!=='Dependency')dependencies[id]="";save();render();return {id,status};}
   $('tasks').innerHTML=G.phases.map((p,i)=>`<section class="task-group" aria-labelledby="phase-${i}"><div class="group-label"><span class="group-index">0${i+1}</span><h3 id="phase-${i}">${p.name}</h3><p>${G.formatTime(p.start)}–${G.formatTime(p.end)}</p><div id="group-count-${i}" class="group-count"></div></div><div class="task-list">${G.tasks.filter(t=>t.phase===i).map(t=>`<article id="card-${t.id}" class="task-card"><span class="vertical-time">${G.formatTime(t.time)}</span><div class="task-meta"><span>${G.formatTime(t.time)}${t.phase===1?'–4:30 PM':t.time===1260&&!t.milestone?'–10:00 PM':''}</span>${t.milestone?'<span class="milestone-tag">MILESTONE</span>':''}</div><h3>${t.title}</h3><p>${t.detail}</p><div class="task-bottom"><label for="state-${t.id}" class="sr-only">Status for ${t.title}</label><select id="state-${t.id}" data-task="${t.id}">${G.statuses.map(s=>`<option>${s}</option>`).join('')}</select><span class="task-timing" id="timing-${t.id}"></span></div><div id="dependency-wrap-${t.id}" class="dependency-field" hidden><label for="dependency-${t.id}">Dependency for ${t.title}</label><select id="dependency-${t.id}" data-dependency="${t.id}" aria-describedby="dependency-detail-${t.id}"><option value="">Choose a dependency…</option>${G.dependencyOptions.map(reason=>`<option>${reason}</option>`).join('')}</select><p id="dependency-detail-${t.id}" class="dependency-detail"></p></div></article>`).join('')}</div></section>`).join('');
   $('lanes').innerHTML=G.phases.map((p,i)=>`<div class="lane"><div class="phase-bar ${i===3?'final-bar':''}" style="left:${G.position(p.start)}%;width:${G.position(p.end)-G.position(p.start)}%"><div id="phase-fill-${i}" class="phase-fill"></div><span>${p.short}</span></div></div>`).join('');
+  $('milestone-list').innerHTML=G.milestones.map(m=>`<li><strong>${G.formatTime(m.time)}</strong><div><h3>${m.title}</h3><p>${m.note}</p></div></li>`).join('');
+  $('dependency-list').innerHTML=G.tasks.map(t=>`<article id="waiting-${t.id}" class="waiting-card" hidden><div><span class="eyebrow">${G.formatTime(t.time)}</span><h3>${t.title}</h3><p id="waiting-reason-${t.id}"></p></div><label class="resolve-label"><span>No longer applies<span class="sr-only"> for ${t.title}</span></span><input type="checkbox" data-resolve="${t.id}" aria-describedby="waiting-reason-${t.id}"></label></article>`).join('');
+  $('dependency-list').addEventListener('change',e=>{
+    const id=e.target.dataset.resolve;
+    if(!id || !e.target.checked || state[id]!=='Dependency')return;
+    const title=G.tasks.find(t=>t.id===id).title;
+    setStatus(id,'Not Started');
+    $('dependency-announcement').textContent=`Dependency cleared for ${title}. Task returned to Not Started.`;
+    const next=G.tasks.find(t=>state[t.id]==='Dependency');
+    if(next)$('waiting-'+next.id).querySelector('input').focus();else $('dependencies-empty').focus();
+  });
   function render(){
+    $('dependencies-empty').hidden=G.tasks.some(t=>state[t.id]==='Dependency');
+    G.tasks.forEach(t=>{
+      $('waiting-'+t.id).hidden=state[t.id]!=='Dependency';
+      $('waiting-reason-'+t.id).textContent=dependencies[t.id]||'Dependency reason not selected';
+      $('waiting-'+t.id).querySelector('input').checked=false;
+    });
     const time=now(), s=G.summarize(time,state), formatted=G.formatTime(time);
     $('clock').innerHTML=formatted.replace(/ (AM|PM)/,' <small>$1</small>');
     $('clock-label').textContent=live?'LIVE · DEVICE TIME':'DEMO CLOCK';
@@ -38,7 +55,10 @@
     G.tasks.forEach(t=>{const status=state[t.id];$(`dependency-wrap-${t.id}`).hidden=status!=='Dependency';$(`dependency-${t.id}`).value=dependencies[t.id];$(`dependency-detail-${t.id}`).textContent=dependencies[t.id];$(`card-${t.id}`).className=`task-card ${slug(status)}`;$(`state-${t.id}`).value=status;$(`timing-${t.id}`).textContent=status==='NA Does not apply'?'Not applicable':status==='Dependency'?'Waiting on dependency':status==='Done'?'✓ Complete':status==='Blocked'?'Needs a hand':status==='Needs More Time'?'More time needed':time<t.time?`In ${G.duration(t.time-time)}`:time>t.end?'Still open':t.milestone?'Scheduled now':'In this window';});
   }
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
-    const vertical=button.dataset.view==='vertical';
+    const view=button.dataset.view, vertical=view==='vertical';
+    $('milestones-view').hidden=view!=='milestones';
+    $('dependencies-view').hidden=view!=='dependencies';
+    $('tasks-view').hidden=!['vertical','grouped'].includes(view);
     $('tasks').classList.toggle('vertical-view',vertical);
     document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
     $('vertical-note').hidden=!vertical;
