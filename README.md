@@ -2,7 +2,7 @@
 
 Web app for working on night shifts when no manager or team lead is available.
 
-A responsive deli closing-shift prototype with sample data and browser-local storage. No account, external services, employee information, or network dependencies.
+A responsive deli closing-shift prototype with sample data and browser-local storage. Task tracking works locally. Shared instructions use Supabase; editing requires an authorized editor account.
 
 ## Try it on your Mac
 
@@ -60,3 +60,11 @@ The website is public. Do not commit credentials, employee details, or confident
 ## Views
 
 Use the menu below the clock overview to switch between Milestones, Grouped tasks, Dependencies, and Vertical timeline. Dependencies lists tasks with Dependency status and their selected reason. Check “No longer applies” on the right to clear the reason and return that task to Not Started. This does not mark the task Done.
+
+## Shared task instructions
+
+Every task has an Instructions preview and View/Close controls. Authorized editors can Edit, Save, or Cancel. Instruction text is public, stored in Supabase, and preserved when resetting a shift. Task status remains browser-local. Refresh instructions loads changes from other devices.
+
+The Supabase JS SDK is vendored in dist/vendor with its version and license. Only a publishable key is included in cloud.js. The database must enforce read and write policies; UI checks alone are not authorization. Editor access is checked through can_edit_instructions(). Supabase dashboard accounts are separate from app users.
+
+Run tests/instructions.cjs with Playwright for mocked-cloud editor flow tests, including signed-out controls, shared saves, failures, text safety and responsive layouts. Actual authorized sign-in and save require the owner’s app account.
